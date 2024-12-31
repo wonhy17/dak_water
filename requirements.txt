@@ -1,0 +1,6 @@
+openai
+streamlit
+python-dotenv
+Pillow
+requests
+pyairtable

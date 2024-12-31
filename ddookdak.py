@@ -62,7 +62,7 @@ with st.sidebar:
         image = Image.open(image_path)
         st.image(image, caption=image_path, use_container_width=True)
     
-st.markdown("<h1 style='font-size: 24px;'>뚝닥 수전 전용 챗봇 🚿</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='font-size: 30px;'>뚝닥 수전 전용 챗봇 🚿</h1>", unsafe_allow_html=True)
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "반갑습니다! 뚝닥 수전 관련 예약 신청 AI입니다.\n\n 상황을 1줄 이내로 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다. \n\n 혹시라도 오류나 마음에 들지 않는 답변이 지속된다면, 1551-7784로 문의주세요!"}]
     

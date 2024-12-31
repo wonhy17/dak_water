@@ -35,7 +35,7 @@ TABLE_NAME = os.getenv("TABLE_NAME")
 
 client = OpenAI(api_key=openai_api_key)
 
-assistant_id = 'asst_C8BF5bV5lIpUAK66L6AR4xnd'
+assistant_id = os.getenv("ASSISTANT_ID")
 
 if "thread_id" not in st.session_state:
     thread = client.beta.threads.create(
@@ -51,11 +51,11 @@ with st.sidebar:
     # 추가로 로컬 이미지나 URL 이미지를 표시할 수 있음
     # 로컬 이미지 경로 리스트
     image_paths = [
-        "file\원홀과 투홀 차이.png",
-        "file\원홀 수전 리스트.jpg",
-        "file\투홀 수전 리스트.jpg",
-        "file\싱크대 수전 리스트.jpg",
-        "file\샤워기 수전 리스트.jpg",
+        os.path.join("file", "원홀과 투홀 차이.png"),
+        os.path.join("file", "원홀 수전 리스트.jpg"),
+        os.path.join("file", "투홀 수전 리스트.jpg"),
+        os.path.join("file", "싱크대 수전 리스트.jpg"),
+        os.path.join("file", "샤워기 수전 리스트.jpg"),
     ]
     st.subheader("이미지 보기")
     for image_path in image_paths:

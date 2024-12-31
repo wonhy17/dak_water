@@ -10,8 +10,6 @@ import base64
 import smtplib
 import datetime
 from pyairtable import Table, Base
-import tkinter as tk
-from tkinter import messagebox
 
 # Airtable API 정보
 TABLE_NAME = "Threads"

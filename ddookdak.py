@@ -11,22 +11,6 @@ import smtplib
 import datetime
 from pyairtable import Table, Base
 
-#배포 시 오른쪽 상단 필수 메뉴 제거거
-st.set_page_config(menu_items=None)
-
-st.markdown(
-    """
-    <style>
-    .css-1jc7ptx, .e1ewe7hr3, .viewerBadge_container__1QSob,
-    .styles_viewerBadge__1yB5_, .viewerBadge_link__1S137,
-    .viewerBadge_text__1JaDK {
-        display: none;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 # Airtable API 정보
 TABLE_NAME = "Threads"
 

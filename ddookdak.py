@@ -66,9 +66,11 @@ st.markdown(hide, unsafe_allow_html=True)
 
 st.components.v1.html("""
 <script>
-    window.onbeforeunload = function () {
-        return "페이지를 떠나시겠습니까?";
-    };
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "hidden") {
+            alert("페이지를 떠나시겠습니까? 대화 기록이 전부 날아가 처음부터 다시 진행해야 할 수 있습니다.");
+        }
+    });
 </script>
 """)
 

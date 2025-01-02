@@ -53,8 +53,8 @@ print(st.session_state)
 hide = """
     <style>
         #MainMenu {visibility: hidden;}
-        #ToolbarMode {visibility: hidden;}
         footer {visibility: hidden;}
+        .reportview-container .main footer {visibility: hidden;}
     </style>
 """
 st.markdown(hide, unsafe_allow_html=True)

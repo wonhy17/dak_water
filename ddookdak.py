@@ -54,12 +54,7 @@ hide = """
     <style>
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
-        footer:after {
-            content: '';
-            display: block;
-            position: relative;
-            color: transparent;
-        }
+        footer:after {content: ''; display: block; position: absolute; bottom: 0; left: 0; height: 0; width: 100%; background: transparent;}
     </style>
 """
 st.markdown(hide, unsafe_allow_html=True)

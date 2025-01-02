@@ -64,13 +64,23 @@ hide = """
 """
 st.markdown(hide, unsafe_allow_html=True)
 
+# HTML 및 JavaScript 삽입
 st.components.v1.html("""
 <script>
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-        alert("모바일 환경에서는 뒤로가기를 누르면 앱이 종료될 수 있습니다. 닫기 버튼을 사용하세요!");
-    }
+    // 브라우저 히스토리 스택에 현재 상태 추가
+    history.pushState(null, null, location.href);
+
+    // 뒤로가기 버튼 이벤트 감지
+    window.onpopstate = function () {
+        // 모바일 환경인지 확인
+        if (/Mobi|Android/i.test(navigator.userAgent)) {
+            alert("뒤로가기를 누르셨습니다. 이 페이지를 떠나시겠습니까?");
+            // 다시 현재 페이지로 이동
+            history.pushState(null, null, location.href);
+        }
+    };
 </script>
-""")
+""", height=0)  # height=0으로 빈 공간 제거
 
 # 이미지 표시 섹션 (사이드바)
 with st.sidebar:

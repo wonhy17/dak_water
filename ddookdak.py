@@ -14,6 +14,16 @@ from pyairtable import Table, Base
 #배포 시 오른쪽 상단 필수 메뉴 제거거
 st.set_page_config(menu_items=None)
 
+import streamlit as st
+
+# Add custom CSS to hide the GitHub icon
+hide_github_icon = """
+#GithubIcon {
+  visibility: hidden;
+}
+"""
+st.markdown(hide_github_icon, unsafe_allow_html=True)
+
 # Airtable API 정보
 TABLE_NAME = "Threads"
 

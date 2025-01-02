@@ -46,6 +46,18 @@ if "thread_id" not in st.session_state:
 
 print(st.session_state)
 
+# code to hide the watermark using CSS
+
+# #MainMenu to hide the burger menu at the top-right side
+# footer to hide the ```made with streamlit``` mark
+hide = """
+    <style>
+        #MainMenu {visibility: hidden;}
+        footer {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide, unsafe_allow_html=True)
+
 # 이미지 표시 섹션 (사이드바)
 with st.sidebar:
     # 추가로 로컬 이미지나 URL 이미지를 표시할 수 있음

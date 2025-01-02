@@ -66,11 +66,9 @@ st.markdown(hide, unsafe_allow_html=True)
 
 st.components.v1.html("""
 <script>
-    document.addEventListener("visibilitychange", function () {
-        if (document.visibilityState === "hidden") {
-            alert("페이지를 떠나시겠습니까? 대화 기록이 전부 날아가 처음부터 다시 진행해야 할 수 있습니다.");
-        }
-    });
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
+        alert("모바일 환경에서는 뒤로가기를 누르면 앱이 종료될 수 있습니다. 닫기 버튼을 사용하세요!");
+    }
 </script>
 """)
 

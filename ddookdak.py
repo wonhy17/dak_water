@@ -121,18 +121,22 @@ with st.sidebar:
         if len(uploaded_files) > 5:
             st.error(f"더 이상 업로드 할 수 없습니다.")
         else:
-            # 파일 처리 및 업로드
-            random_float = str(np.random.random())
-            uploaded_url = upload_to_cloudinary(uploaded_files[-1],random_float)
-            last = table.all(sort=['시간'])[-1]
-            if "photoN" not in st.session_state:
-                st.session_state["photoN"] = 1
-                pn = st.session_state["photoN"]
-            else:
-                st.session_state["photoN"] = st.session_state["photoN"] + 1
-                pn = st.session_state["photoN"]
-            table.update(last['id'],{f'현장사진{pn}': uploaded_url})
-            print(f'현장사진{pn}')
+            # uploaded_files 리스트에 중복값이 존재하는지 확인인
+            seen = set()
+            duplicates = set(x for x in uploaded_files if x in seen or seen.add(x))
+            if len(duplicates) == 0: # 중복값이 없다면(중복값이 있다는 건 삭제를 진행한 게 아니며, 중복 업로드 한 게 아니라는 뜻)
+                # 파일 처리 및 업로드
+                random_float = str(np.random.random())
+                uploaded_url = upload_to_cloudinary(uploaded_files[-1],random_float)
+                last = table.all(sort=['시간'])[-1]
+                if "photoN" not in st.session_state:
+                    st.session_state["photoN"] = 1
+                    pn = st.session_state["photoN"]
+                else:
+                    st.session_state["photoN"] = st.session_state["photoN"] + 1
+                    pn = st.session_state["photoN"]
+                table.update(last['id'],{f'현장사진{pn}': uploaded_url})
+                print(f'현장사진{pn}')
     
     # 사이드바 -> 이미지 보기
     st.subheader("이미지 보기")
@@ -142,7 +146,7 @@ with st.sidebar:
     
 st.markdown("<h1 style='font-size: 30px;'>뚝닥 수전 전용 챗봇 🚿</h1>", unsafe_allow_html=True)
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "반갑습니다! \n\n 상황을 1줄 이내로 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다. \n\n 기타 문제 발생 시시, 1551-7784로 문의주세요!"}]
+    st.session_state["messages"] = [{"role": "assistant", "content": "반갑습니다! \n\n 상황을 간단히 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다. \n\n 기타 문제 발생 시, 1551-7784로 문의주세요!"}]
     
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])

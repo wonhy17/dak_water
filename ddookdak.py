@@ -53,7 +53,7 @@ print(st.session_state)
 hide = """
     <style>
         #MainMenu {visibility: hidden;}
-        toolbarMode {visibility: hidden;}
+        #toolbarMode {visibility: hidden;}
         footer {visibility: hidden;}
     </style>
 """

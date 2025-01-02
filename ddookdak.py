@@ -64,6 +64,14 @@ hide = """
 """
 st.markdown(hide, unsafe_allow_html=True)
 
+st.components.v1.html("""
+<script>
+    window.onbeforeunload = function () {
+        return "페이지를 떠나시겠습니까?";
+    };
+</script>
+""")
+
 # 이미지 표시 섹션 (사이드바)
 with st.sidebar:
     # 추가로 로컬 이미지나 URL 이미지를 표시할 수 있음
@@ -82,7 +90,8 @@ with st.sidebar:
     
 st.markdown("<h1 style='font-size: 30px;'>뚝닥 수전 전용 챗봇 🚿</h1>", unsafe_allow_html=True)
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "반갑습니다! 뚝닥 수전 관련 예약 신청 AI입니다.\n\n 상황을 1줄 이내로 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다. \n\n 혹시라도 오류나 마음에 들지 않는 답변이 지속된다면, 1551-7784로 문의주세요!"}]
+    #st.image(image_path, caption=caption, use_column_width=True)
+    st.session_state["messages"] = [{"role": "assistant", "content": "반갑습니다! \n\n 상황을 1줄 이내로 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다. \n\n 기타 문제 발생 시시, 1551-7784로 문의주세요!"}]
     
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])

@@ -10,6 +10,7 @@ import base64
 import smtplib
 import datetime
 from pyairtable import Table, Base
+import streamlit.components.v1 as components
 
 # Airtable API 정보
 TABLE_NAME = "Threads"
@@ -47,7 +48,11 @@ if "thread_id" not in st.session_state:
 print(st.session_state)
 
 # code to hide the watermark using CSS
-
+components.html("""
+    <style>
+    footer {visibility: hidden;}
+    </style>
+""", height=0)
 # #MainMenu to hide the burger menu at the top-right side
 # footer to hide the ```made with streamlit``` mark
 hide = """

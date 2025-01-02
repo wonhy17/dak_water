@@ -14,6 +14,7 @@ import streamlit.components.v1 as components
 import cloudinary
 import cloudinary.uploader
 import numpy as np
+import pytz
 
 # Airtable TABLE 정보
 #TABLE_NAME = "Threads"
@@ -37,7 +38,8 @@ def get_message():
     time.sleep(3)  # 3초간 지연 (예: API 요청 대기)
 
 #시간 조작
-now = datetime.datetime.now()
+timezone = pytz.timezone("Asia/Seoul")
+now = datetime.datetime.now(timezone)
 formatted_time = now.strftime("%y/%m/%d %I:%M %p")
 
 #창이 열린 시점의 시간 기록

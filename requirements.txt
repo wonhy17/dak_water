@@ -4,3 +4,5 @@ python-dotenv
 Pillow
 requests
 pyairtable
+cloudinary
+numpy

@@ -11,9 +11,27 @@ import smtplib
 import datetime
 from pyairtable import Table, Base
 import streamlit.components.v1 as components
+import cloudinary
+import cloudinary.uploader
+import numpy as np
 
-# Airtable API 정보
-TABLE_NAME = "Threads"
+# Airtable TABLE 정보
+#TABLE_NAME = "Threads"
+
+# 1) .env 파일 로드
+load_dotenv()
+# 2) 환경 변수에서 값 가져오기
+openai_api_key = os.getenv("OPENAI_API_KEY")
+airtable_api_key = os.getenv("AIRTABLE_API_KEY")
+BASE_ID = os.getenv("BASE_ID")
+TABLE_NAME = os.getenv("TABLE_NAME")
+api_secret = os.getenv('YOUR_API_SECRET')
+api_key = os.getenv('YOUR_API_KEY')
+cloud_name = os.getenv('CLOUD_NAME')
+#Airtable url
+url = f"https://api.airtable.com/v0/{BASE_ID}/{TABLE_NAME}"
+
+table = Table(airtable_api_key, BASE_ID, TABLE_NAME)
 
 def get_message():
     time.sleep(3)  # 3초간 지연 (예: API 요청 대기)
@@ -25,27 +43,25 @@ formatted_time = now.strftime("%y/%m/%d %I:%M %p")
 #창이 열린 시점의 시간 기록
 window_open_time = time.time()
 
-# 1) .env 파일 로드
-load_dotenv()
+# Cloudinary 설정
+cloudinary.config(
+    cloud_name= cloud_name,
+    api_key= api_key,
+    api_secret= api_secret
+)
+# Cloudinary 사용 함수
+def upload_to_cloudinary(file, file_name):
+    response = cloudinary.uploader.upload(file, public_id=file_name)
+    return response["secure_url"]
 
-# 2) 환경 변수에서 값 가져오기
-openai_api_key = os.getenv("OPENAI_API_KEY")
-airtable_api_key = os.getenv("AIRTABLE_API_KEY")
-BASE_ID = os.getenv("BASE_ID")
-TABLE_NAME = os.getenv("TABLE_NAME")
 
 client = OpenAI(api_key=openai_api_key)
-
 assistant_id = os.getenv("ASSISTANT_ID")
 
 if "thread_id" not in st.session_state:
-    thread = client.beta.threads.create(
-        
-    )
+    thread = client.beta.threads.create()
     thread_id = thread.id
     st.session_state["thread_id"] = thread_id
-
-print(st.session_state)
 
 # code to hide the watermark using CSS
 components.html("""
@@ -93,6 +109,30 @@ with st.sidebar:
         os.path.join("file", "싱크대 수전 리스트.jpg"),
         os.path.join("file", "샤워기 수전 리스트.jpg"),
     ]
+    uploaded_files = st.file_uploader(
+    "최대 5장까지 업로드 가능합니다.",
+    type=["jpg", "png", "jpeg"],
+    accept_multiple_files=True
+)
+
+    if uploaded_files:
+        if len(uploaded_files) > 5:
+            st.error(f"더 이상 업로드 할 수 없습니다.")
+        else:
+            # 파일 처리 및 업로드
+            random_float = str(np.random.random())
+            uploaded_url = upload_to_cloudinary(uploaded_files[-1],random_float)
+            last = table.all(sort=['시간'])[-1]
+            if "photoN" not in st.session_state:
+                st.session_state["photoN"] = 1
+                pn = st.session_state["photoN"]
+            else:
+                st.session_state["photoN"] = st.session_state["photoN"] + 1
+                pn = st.session_state["photoN"]
+            table.update(last['id'],{f'현장사진{pn}': uploaded_url})
+            print(f'현장사진{pn}')
+    
+    # 사이드바 -> 이미지 보기
     st.subheader("이미지 보기")
     for image_path in image_paths:
         image = Image.open(image_path)
@@ -100,7 +140,6 @@ with st.sidebar:
     
 st.markdown("<h1 style='font-size: 30px;'>뚝닥 수전 전용 챗봇 🚿</h1>", unsafe_allow_html=True)
 if "messages" not in st.session_state:
-    #st.image(image_path, caption=caption, use_column_width=True)
     st.session_state["messages"] = [{"role": "assistant", "content": "반갑습니다! \n\n 상황을 1줄 이내로 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다. \n\n 기타 문제 발생 시시, 1551-7784로 문의주세요!"}]
     
 for msg in st.session_state.messages:
@@ -143,8 +182,6 @@ if prompt := st.chat_input():
     thread_messages = client.beta.threads.messages.list(st.session_state["thread_id"])
     
     msg = thread_messages.data[0].content[0].text.value
-
-    table = Table(airtable_api_key, BASE_ID, TABLE_NAME)
 
     table.create({
         'thread_id': st.session_state["thread_id"][-4:],

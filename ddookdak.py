@@ -11,6 +11,9 @@ import smtplib
 import datetime
 from pyairtable import Table, Base
 
+#배포 시 오른쪽 상단 필수 메뉴 제거거
+st.set_page_config(menu_items=None)
+
 # Airtable API 정보
 TABLE_NAME = "Threads"
 

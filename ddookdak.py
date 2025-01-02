@@ -121,9 +121,11 @@ with st.sidebar:
         if len(uploaded_files) > 5:
             st.error(f"더 이상 업로드 할 수 없습니다.")
         else:
-            # uploaded_files 리스트에 중복값이 존재하는지 확인인
+            # uploaded_files 리스트에 중복값이 존재하는지 확인
             seen = set()
-            duplicates = set(x for x in uploaded_files if x in seen or seen.add(x))
+            #사진명만 추출해서 리스트로 만듬
+            file_names = [file.name for file in uploaded_files]
+            duplicates = set(x for x in file_names if x in seen or seen.add(x))
             if len(duplicates) == 0: # 중복값이 없다면(중복값이 있다는 건 삭제를 진행한 게 아니며, 중복 업로드 한 게 아니라는 뜻)
                 # 파일 처리 및 업로드
                 random_float = str(np.random.random())

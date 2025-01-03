@@ -146,7 +146,7 @@ with st.sidebar:
         image = Image.open(image_path)
         st.image(image, caption=image_path, use_container_width=True)
     
-st.markdown("<h1 style='font-size: 30px;'>수전 수리 견적과 예약 진행을 도와드립니다다 🚿</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='font-size: 30px;'>견적과 예약 진행을 도와드립니다 🚿</h1>", unsafe_allow_html=True)
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "상황을 간단히 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다.(예상 소요 시간 2분) \n\n 기타 문제 발생 시, 1551-7784로 문의주세요!"}]
     

@@ -82,6 +82,24 @@ hide = """
 """
 st.markdown(hide, unsafe_allow_html=True)
 
+# 사이드바 CSS 적용
+st.markdown("""
+<style>
+/* 사이드바 전체 스타일 */
+[data-testid="stSidebar"] {
+    background-color:rgb(234, 234, 234); /* 배경색 */
+}
+
+/* 화살표 아이콘 변경 */
+[data-testid="stSidebar"] .streamlit-expanderHeader:after {
+    content: "▼"; /* 화살표 스타일 변경 */
+    font-size: 1.2rem; /* 화살표 크기 */
+    font-weight: bold; /* 화살표 두께 */
+    color: #333; /* 화살표 색상 */
+}
+</style>
+""", unsafe_allow_html=True)
+
 # HTML 및 JavaScript 삽입
 st.components.v1.html("""
 <script>
@@ -115,7 +133,7 @@ with st.sidebar:
     "최대 5장까지 업로드 가능합니다.",
     type=["jpg", "png", "jpeg"],
     accept_multiple_files=True
-)
+    )
 
     if uploaded_files:
         if len(uploaded_files) > 5:
@@ -139,12 +157,35 @@ with st.sidebar:
                     pn = st.session_state["photoN"]
                 table.update(last['id'],{f'현장사진{pn}': uploaded_url})
                 print(f'현장사진{pn}')
+
+    #원홀과 투홀 차이 사진
+    st.write("원홀과 투홀 차이")
+    image = Image.open(image_paths[0])
+    st.image(image, caption=image_paths[0], use_container_width=True)
     
-    # 사이드바 -> 이미지 보기
-    st.subheader("이미지 보기")
-    for image_path in image_paths:
-        image = Image.open(image_path)
-        st.image(image, caption=image_path, use_container_width=True)
+    # 사이드바 메뉴 생성
+    selected_category = st.selectbox(
+        "아래에서 카테고리를 선택하세요:",
+        [
+            "싱크대 수전",
+            "샤워기 수전",
+            "세면대(원홀)",
+            "세면대(투홀)",
+        ]
+    )
+    # 선택된 메뉴에 따라 사진 출력
+    if selected_category == "싱크대 수전":
+        image = Image.open(image_paths[3])
+        st.image(image, caption=image_paths[3], use_container_width=True)
+    elif selected_category == "샤워기 수전":
+        image = Image.open(image_paths[4])
+        st.image(image, caption=image_paths[4], use_container_width=True)
+    elif selected_category == "세면대(원홀)":
+        image = Image.open(image_paths[1])
+        st.image(image, caption=image_paths[1], use_container_width=True)
+    elif selected_category == "세면대(투홀)":
+        image = Image.open(image_paths[2])
+        st.image(image, caption=image_paths[2], use_container_width=True)
     
 st.markdown("<h1 style='font-size: 30px;'>견적과 예약 진행을 도와드립니다 🚿</h1>", unsafe_allow_html=True)
 if "messages" not in st.session_state:

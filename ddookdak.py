@@ -56,7 +56,6 @@ def upload_to_cloudinary(file, file_name):
     response = cloudinary.uploader.upload(file, public_id=file_name)
     return response["secure_url"]
 
-
 client = OpenAI(api_key=openai_api_key)
 assistant_id = os.getenv("ASSISTANT_ID")
 
@@ -82,14 +81,11 @@ hide = """
 """
 st.markdown(hide, unsafe_allow_html=True)
 
-
-
 # HTML 및 JavaScript 삽입 뒤로가기 방지
 st.components.v1.html("""
 <script>
     // 브라우저 히스토리 스택에 현재 상태 추가
     history.pushState(null, null, location.href);
-
     // 뒤로가기 버튼 이벤트 감지
     window.onpopstate = function () {
         // 모바일 환경인지 확인
@@ -106,8 +102,8 @@ st.components.v1.html("""
 if "chatbot_response" not in st.session_state:
     st.session_state["chatbot_response"] = ''
 
-if "uploaded_file" not in st.session_state:
-    st.session_state["uploaded_file"] = None
+if "uploaded_files_len" not in st.session_state:
+    st.session_state["uploaded_files_len"] = 0
 
 # 이미지 표시 섹션 (사이드바)
 with st.sidebar:
@@ -127,28 +123,50 @@ with st.sidebar:
         accept_multiple_files=True
     )
 
-    if uploaded_files and st.session_state["chatbot_response"] is None:
+    if uploaded_files:
+            print("streamlit에 파일 업로드")
+            print(len(uploaded_files), st.session_state["uploaded_files_len"])
             if len(uploaded_files) > 5 :
                 st.error(f"업로드 할 수 없습니다.")
-            else:
+            # 파일 업로드가 진짜 이뤄졌다면 실행
+            
+            elif len(uploaded_files) > st.session_state["uploaded_files_len"]:
+                #한 번에 업로드 된 파일 수
+                real_upload_file_N = len(uploaded_files) - st.session_state["uploaded_files_len"]
                 # uploaded_files 리스트에 중복값이 존재하는지 확인
                 seen = set()
-                #사진명만 추출해서 리스트로 만듬
                 file_names = [file.name for file in uploaded_files]
                 duplicates = set(x for x in file_names if x in seen or seen.add(x))
+                # 업로드 된 파일의 url을 저장할 리스트(만약 한 번에 3번 업로드 하는 케이스일 경우 리스트로 담아뒀다가 전부 db로 보내야 한다.)
+                uploaded_url_list = []
                 if len(duplicates) == 0: # 중복값이 없다면(중복값이 있다는 건 삭제를 진행한 게 아니며, 중복 업로드 한 게 아니라는 뜻)
-                    # 파일 처리 및 업로드
-                    random_float = str(np.random.random())
-                    uploaded_url = upload_to_cloudinary(uploaded_files[-1],random_float)
-                    last = table.all(sort=['시간'])[-1]
-                    if "photoN" not in st.session_state:
-                        st.session_state["photoN"] = 1
-                        pn = st.session_state["photoN"]
-                    else:
-                        st.session_state["photoN"] = st.session_state["photoN"] + 1
-                        pn = st.session_state["photoN"]
-                    table.update(last['id'],{f'현장사진{pn}': uploaded_url})
-                    print(f'현장사진{pn}')
+                    # cloudnary에 들어갈 파일 랜덤 변수 지정
+                    for i in range(real_upload_file_N):
+                        photo_random_float = str(np.random.random())
+                        # 변환 완료
+                        uploaded_url = upload_to_cloudinary(uploaded_files[-i-1],photo_random_float)
+                        # 업로드 된 파일의 url을 리스트에 추가
+                        uploaded_url_list.append(uploaded_url)
+                    #테이블에서 대화 중인 thread_id의 테이블들 찾기
+                    column_name = "thread_id"
+                    desire = st.session_state["thread_id"]
+                    formula = f"FIND('{desire[-4:]}', {{{column_name}}})"
+                    filtered_records = table.all(formula=formula)
+                    # 찾은 테이블의 id만 모아서 리스트로 모으기
+                    id_list = [record["id"] for record in filtered_records]
+                    for i in range(real_upload_file_N):
+                        #현장사진1~8 구분
+                        if "photoN" not in st.session_state:
+                            st.session_state["photoN"] = 1
+                            pn = st.session_state["photoN"]
+                        else:
+                            st.session_state["photoN"] = st.session_state["photoN"] + 1
+                            pn = st.session_state["photoN"]
+                        #가장 먼저 태어난 id를 가진 테이블에 업로드한 사진을 업데이트
+                        table.update(id_list[-1],{f'현장사진{pn}': uploaded_url_list[i]})
+                    print("streamlit에 파일 업로드2")
+                    # strealit에 업로드 된 파일 수랑 세션의 내가 지정한 파일 수랑 같게 함
+                    st.session_state["uploaded_files_len"] = len(uploaded_files)
 
     #원홀과 투홀 차이 사진
     st.write("원홀과 투홀 차이")
@@ -182,6 +200,7 @@ with st.sidebar:
 
     
 st.markdown("<h1 style='font-size: 30px;'>수전 견적 및 예약AI 🚿</h1>", unsafe_allow_html=True)
+print("시작")
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "상황을 간단히 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다.(예상 소요 시간 2분) \n\n 기타 문제 발생 시, 1551-7784로 문의주세요!"}]
     
@@ -215,8 +234,9 @@ if prompt := st.chat_input():
             thread_id=st.session_state["thread_id"],
             run_id = run.id
         )
+        print("답변 중")
         # 스피너를 이용하여 로딩 애니메이션 표시
-        with st.spinner('Getting your message...'):
+        with st.spinner('답변 중...'):
             message = get_message()
             
         if run.status == 'completed':
@@ -225,9 +245,9 @@ if prompt := st.chat_input():
             time.sleep(0.5)
     
     thread_messages = client.beta.threads.messages.list(st.session_state["thread_id"])
-    
+    print("답변 중2")
     msg = thread_messages.data[0].content[0].text.value
-
+    
     st.session_state.messages.append({"role": "assistant", "content": msg})
     st.chat_message("assistant").write(msg)
     

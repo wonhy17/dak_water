@@ -82,25 +82,9 @@ hide = """
 """
 st.markdown(hide, unsafe_allow_html=True)
 
-# 사이드바 CSS 적용
-st.markdown("""
-<style>
-/* 사이드바 전체 스타일 */
-[data-testid="stSidebar"] {
-    background-color:rgb(234, 234, 234); /* 배경색 */
-}
 
-/* 화살표 아이콘 변경 */
-[data-testid="stSidebar"] .streamlit-expanderHeader:after {
-    content: "▼"; /* 화살표 스타일 변경 */
-    font-size: 1.2rem; /* 화살표 크기 */
-    font-weight: bold; /* 화살표 두께 */
-    color: #333; /* 화살표 색상 */
-}
-</style>
-""", unsafe_allow_html=True)
 
-# HTML 및 JavaScript 삽입
+# HTML 및 JavaScript 삽입 뒤로가기 방지
 st.components.v1.html("""
 <script>
     // 브라우저 히스토리 스택에 현재 상태 추가
@@ -118,6 +102,13 @@ st.components.v1.html("""
 </script>
 """, height=0)  # height=0으로 빈 공간 제거
 
+#챗봇이 run 실행을 명령 받았는지 확인하는 세션
+if "chatbot_response" not in st.session_state:
+    st.session_state["chatbot_response"] = ''
+
+if "uploaded_file" not in st.session_state:
+    st.session_state["uploaded_file"] = None
+
 # 이미지 표시 섹션 (사이드바)
 with st.sidebar:
     # 추가로 로컬 이미지나 URL 이미지를 표시할 수 있음
@@ -129,65 +120,68 @@ with st.sidebar:
         os.path.join("file", "싱크대 수전 리스트.jpg"),
         os.path.join("file", "샤워기 수전 리스트.jpg"),
     ]
+    
     uploaded_files = st.file_uploader(
-    "최대 5장까지 업로드 가능합니다.",
-    type=["jpg", "png", "jpeg"],
-    accept_multiple_files=True
+        "최대 5장까지 업로드 가능합니다.",
+        type=["jpg", "png", "jpeg"],
+        accept_multiple_files=True
     )
 
-    if uploaded_files:
-        if len(uploaded_files) > 5:
-            st.error(f"더 이상 업로드 할 수 없습니다.")
-        else:
-            # uploaded_files 리스트에 중복값이 존재하는지 확인
-            seen = set()
-            #사진명만 추출해서 리스트로 만듬
-            file_names = [file.name for file in uploaded_files]
-            duplicates = set(x for x in file_names if x in seen or seen.add(x))
-            if len(duplicates) == 0: # 중복값이 없다면(중복값이 있다는 건 삭제를 진행한 게 아니며, 중복 업로드 한 게 아니라는 뜻)
-                # 파일 처리 및 업로드
-                random_float = str(np.random.random())
-                uploaded_url = upload_to_cloudinary(uploaded_files[-1],random_float)
-                last = table.all(sort=['시간'])[-1]
-                if "photoN" not in st.session_state:
-                    st.session_state["photoN"] = 1
-                    pn = st.session_state["photoN"]
-                else:
-                    st.session_state["photoN"] = st.session_state["photoN"] + 1
-                    pn = st.session_state["photoN"]
-                table.update(last['id'],{f'현장사진{pn}': uploaded_url})
-                print(f'현장사진{pn}')
+    if uploaded_files and st.session_state["chatbot_response"] is None:
+            if len(uploaded_files) > 5 :
+                st.error(f"업로드 할 수 없습니다.")
+            else:
+                # uploaded_files 리스트에 중복값이 존재하는지 확인
+                seen = set()
+                #사진명만 추출해서 리스트로 만듬
+                file_names = [file.name for file in uploaded_files]
+                duplicates = set(x for x in file_names if x in seen or seen.add(x))
+                if len(duplicates) == 0: # 중복값이 없다면(중복값이 있다는 건 삭제를 진행한 게 아니며, 중복 업로드 한 게 아니라는 뜻)
+                    # 파일 처리 및 업로드
+                    random_float = str(np.random.random())
+                    uploaded_url = upload_to_cloudinary(uploaded_files[-1],random_float)
+                    last = table.all(sort=['시간'])[-1]
+                    if "photoN" not in st.session_state:
+                        st.session_state["photoN"] = 1
+                        pn = st.session_state["photoN"]
+                    else:
+                        st.session_state["photoN"] = st.session_state["photoN"] + 1
+                        pn = st.session_state["photoN"]
+                    table.update(last['id'],{f'현장사진{pn}': uploaded_url})
+                    print(f'현장사진{pn}')
 
     #원홀과 투홀 차이 사진
     st.write("원홀과 투홀 차이")
     image = Image.open(image_paths[0])
     st.image(image, caption=image_paths[0], use_container_width=True)
-    
+        
     # 사이드바 메뉴 생성
     selected_category = st.selectbox(
-        "아래에서 카테고리를 선택하세요:",
-        [
-            "싱크대 수전",
-            "샤워기 수전",
-            "세면대(원홀)",
-            "세면대(투홀)",
-        ]
+            "아래에서 카테고리를 선택하세요:",
+            [
+                "싱크대 수전",
+                "샤워기 수전",
+                "세면대(원홀)",
+                "세면대(투홀)",
+            ]
     )
     # 선택된 메뉴에 따라 사진 출력
     if selected_category == "싱크대 수전":
-        image = Image.open(image_paths[3])
-        st.image(image, caption=image_paths[3], use_container_width=True)
+            image = Image.open(image_paths[3])
+            st.image(image, caption=image_paths[3], use_container_width=True)
     elif selected_category == "샤워기 수전":
-        image = Image.open(image_paths[4])
-        st.image(image, caption=image_paths[4], use_container_width=True)
+            image = Image.open(image_paths[4])
+            st.image(image, caption=image_paths[4], use_container_width=True)
     elif selected_category == "세면대(원홀)":
-        image = Image.open(image_paths[1])
-        st.image(image, caption=image_paths[1], use_container_width=True)
+            image = Image.open(image_paths[1])
+            st.image(image, caption=image_paths[1], use_container_width=True)
     elif selected_category == "세면대(투홀)":
-        image = Image.open(image_paths[2])
-        st.image(image, caption=image_paths[2], use_container_width=True)
+            image = Image.open(image_paths[2])
+            st.image(image, caption=image_paths[2], use_container_width=True)
+
+
     
-st.markdown("<h1 style='font-size: 30px;'>견적과 예약 진행을 도와드립니다 🚿</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='font-size: 30px;'>수전 견적 및 예약AI 🚿</h1>", unsafe_allow_html=True)
 if "messages" not in st.session_state:
     st.session_state["messages"] = [{"role": "assistant", "content": "상황을 간단히 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다.(예상 소요 시간 2분) \n\n 기타 문제 발생 시, 1551-7784로 문의주세요!"}]
     
@@ -208,12 +202,14 @@ if prompt := st.chat_input():
         role="user",
         content=prompt
     )
-        
+    
     run = client.beta.threads.runs.create(
         thread_id=st.session_state["thread_id"],
         assistant_id = assistant_id
     )
-        
+    
+    st.session_state["chatbot_response"] = run.status
+    
     while True:
         run = client.beta.threads.runs.retrieve(
             thread_id=st.session_state["thread_id"],
@@ -232,6 +228,11 @@ if prompt := st.chat_input():
     
     msg = thread_messages.data[0].content[0].text.value
 
+    st.session_state.messages.append({"role": "assistant", "content": msg})
+    st.chat_message("assistant").write(msg)
+    
+    st.session_state["chatbot_response"] = ''
+    
     table.create({
         'thread_id': st.session_state["thread_id"][-4:],
         '시간': formatted_time,
@@ -239,6 +240,3 @@ if prompt := st.chat_input():
         'AI': msg,
         }
     )
-    
-    st.session_state.messages.append({"role": "assistant", "content": msg})
-    st.chat_message("assistant").write(msg)

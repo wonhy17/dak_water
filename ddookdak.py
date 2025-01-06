@@ -16,9 +16,6 @@ import cloudinary.uploader
 import numpy as np
 import pytz
 
-# Airtable TABLE 정보
-#TABLE_NAME = "Threads"
-
 # 1) .env 파일 로드
 load_dotenv()
 # 2) 환경 변수에서 값 가져오기
@@ -124,7 +121,7 @@ with st.sidebar:
     )
 
     if uploaded_files:
-            print("streamlit에 파일 업로드")
+            print(st.session_state["chatbot_response"],"입니다다")
             print(len(uploaded_files), st.session_state["uploaded_files_len"])
             if len(uploaded_files) > 5 :
                 st.error(f"업로드 할 수 없습니다.")
@@ -202,7 +199,7 @@ with st.sidebar:
 st.markdown("<h1 style='font-size: 30px;'>수전 견적 및 예약AI 🚿</h1>", unsafe_allow_html=True)
 print("시작")
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "상황을 간단히 말씀해주시면 6~7가지 필수 사전 질문 답변 후 최종 예약 및 견적 확인을 진행할 수 있습니다.(예상 소요 시간 2분) \n\n 기타 문제 발생 시, 1551-7784로 문의주세요!"}]
+    st.session_state["messages"] = [{"role": "assistant", "content": "어떤 수리가 필요하신가요?\n(예: 수전교체) \n예상 소요 시간: 3분 이내  \n\n 문제 발생 시, 1551-7784로 문의주세요!"}]
     
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
@@ -228,6 +225,7 @@ if prompt := st.chat_input():
     )
     
     st.session_state["chatbot_response"] = run.status
+    print(st.session_state["chatbot_response"])
     
     while True:
         run = client.beta.threads.runs.retrieve(
@@ -238,7 +236,6 @@ if prompt := st.chat_input():
         # 스피너를 이용하여 로딩 애니메이션 표시
         with st.spinner('답변 중...'):
             message = get_message()
-            
         if run.status == 'completed':
             break
         else:
@@ -251,7 +248,7 @@ if prompt := st.chat_input():
     st.session_state.messages.append({"role": "assistant", "content": msg})
     st.chat_message("assistant").write(msg)
     
-    st.session_state["chatbot_response"] = ''
+    #st.session_state["chatbot_response"] = ''
     
     table.create({
         'thread_id': st.session_state["thread_id"][-4:],

@@ -196,10 +196,10 @@ with st.sidebar:
 
 
     
-st.markdown("<h1 style='font-size: 30px;'>수전 견적 및 예약AI 🚿</h1>", unsafe_allow_html=True)
+st.markdown("<h1 style='font-size: 30px;'>수전 수리 상담</h1>", unsafe_allow_html=True)
 print("시작")
 if "messages" not in st.session_state:
-    st.session_state["messages"] = [{"role": "assistant", "content": "어떤 수리가 필요하신가요?\n(예: 수전교체) \n예상 소요 시간: 3분 이내  \n\n 문제 발생 시, 1551-7784로 문의주세요!"}]
+    st.session_state["messages"] = [{"role": "assistant", "content": "어떤 수리가 필요하신가요?\n(예: 수전교체) \n예상 소요 시간: 2분 이내  \n\n 문제 발생 시, 1551-7784로 문의주세요!"}]
     
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).write(msg["content"])
